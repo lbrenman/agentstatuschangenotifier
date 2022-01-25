@@ -1,0 +1,435 @@
+{
+	"schemaVersion": "4",
+	"info": {
+		"name": "webhookhandler - post /amplifycentralwebhookhandler"
+	},
+	"parameter": {
+		"properties": {
+			"params": {
+				"type": "object",
+				"description": "The parameters from the endpoint."
+			},
+			"request": {
+				"type": "object",
+				"description": "The HTTP request."
+			},
+			"config": {
+				"type": "object",
+				"description": "The service's configuration"
+			},
+			"env": {
+				"type": "object",
+				"description": "The host OS environment"
+			}
+		},
+		"additionalProperties": false,
+		"required": [
+			"request",
+			"config",
+			"env",
+			"params"
+		]
+	},
+	"start": "condition.1",
+	"nodes": {
+		"http.1": {
+			"type": "nodehandler://axway-flow/http",
+			"name": "Set HTTP Response Nothing To Do",
+			"method": "setresponse",
+			"parameters": [
+				{
+					"name": "status",
+					"type": "number",
+					"value": "200",
+					"metaName": "Status",
+					"metaDescription": "The HTTP status code"
+				},
+				{
+					"name": "body",
+					"type": "string",
+					"value": "\"Not an Agent Status Change event; Nothing to do!!\"",
+					"metaName": "Body",
+					"metaDescription": "The response payload"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				}
+			},
+			"metaMethod": "Set HTTP Response"
+		},
+		"condition.1": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "subresourceIsStatus",
+			"method": "equals",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.request.body.metadata.subresource",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				},
+				{
+					"name": "value",
+					"type": "string",
+					"value": "\"status\"",
+					"metaName": "Value",
+					"metaDescription": "The value to test input against."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"condition.2"
+					],
+					"context": "$.equals",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"http.1"
+					],
+					"context": "$.equals",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Equals"
+		},
+		"http.2": {
+			"type": "nodehandler://axway-flow/http",
+			"name": "Set HTTP Response Success",
+			"method": "setresponse",
+			"parameters": [
+				{
+					"name": "status",
+					"type": "number",
+					"value": "200",
+					"metaName": "Status",
+					"metaDescription": "The HTTP status code"
+				},
+				{
+					"name": "body",
+					"type": "string",
+					"value": "\"success\"",
+					"metaName": "Body",
+					"metaDescription": "The response payload"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				}
+			},
+			"metaMethod": "Set HTTP Response"
+		},
+		"condition.2": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "typeIsSubResourceUpdated",
+			"method": "equals",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.request.body.type",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				},
+				{
+					"name": "value",
+					"type": "string",
+					"value": "\"SubResourceUpdated\"",
+					"metaName": "Value",
+					"metaDescription": "The value to test input against."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"condition.3"
+					],
+					"context": "$.equals",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"http.1"
+					],
+					"context": "$.equals",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Equals"
+		},
+		"condition.3": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "isDiscoveryAgent",
+			"method": "equals",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.request.body.payload.kind",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				},
+				{
+					"name": "value",
+					"type": "string",
+					"value": "\"DiscoveryAgent\"",
+					"metaName": "Value",
+					"metaDescription": "The value to test input against."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"condition.6"
+					],
+					"context": "$.equals",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"condition.4"
+					],
+					"context": "$.equals",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Equals"
+		},
+		"condition.4": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "isTraceabilityAgent",
+			"method": "equals",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.request.body.payload.kind",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				},
+				{
+					"name": "value",
+					"type": "string",
+					"value": "\"TraceabilityAgent\"",
+					"metaName": "Value",
+					"metaDescription": "The value to test input against."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"condition.6"
+					],
+					"context": "$.equals",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"http.1"
+					],
+					"context": "$.equals",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Equals"
+		},
+		"condition.5": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "isStateUnchanged",
+			"method": "equals",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.request.body.payload.status.state",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				},
+				{
+					"name": "value",
+					"type": "jsonpath",
+					"value": "$.request.body.payload.status.previousState",
+					"metaName": "Value",
+					"metaDescription": "The value to test input against."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"http.1"
+					],
+					"context": "$.equals",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"javascript.1"
+					],
+					"context": "$.equals",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Equals"
+		},
+		"javascript.1": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-javascript/javascript",
+			"name": "prepareTeamsMessageBody",
+			"method": "Execute",
+			"parameters": [
+				{
+					"name": "data",
+					"type": "jsonpath",
+					"value": "$",
+					"metaName": "Data",
+					"metaDescription": "The value to apply as the `data` argument of the JavaScript code. For objects and arrays, `data` is passed by reference."
+				},
+				{
+					"name": "code",
+					"type": "string",
+					"value": "\"let apicentralUrl = data.env.API_CENTRAL_URL ? data.env.API_CENTRAL_URL : 'https://apicentral.axway.com';\\n  //let apicentralUrl = 'https://apicentral.axway.com';\\n\\n  let envURL = apicentralUrl+'/topology/environments/details/'+data.request.body.payload.metadata.scope.name;\\n  \\n  let agentPrefix;\\n  \\n  let payload = data.request.body.payload;\\n\\n  payload.kind === \\\"TraceabilityAgent\\\" ? agentPrefix = \\\"Traceability\\\" : agentPrefix = \\\"Discovery\\\";\\n\\n  const message = agentPrefix+\\\" agent **\\\"+payload.name+\\\"** from Environment **\\\"+payload.metadata.scope.name+\\\"** has changed it's status to **\\\"+payload.status.state+\\\"**\\\";\\n\\n  var suffix;\\n  switch (payload.status.state) {\\n    case 'stopped':\\n      suffix = 'WARNING';\\n      break;\\n    case 'unhealthy':\\n      suffix = 'WARNING';\\n      break;\\n    case 'failed':\\n      suffix = 'ERROR';\\n      break;\\n    default:\\n      suffix = 'UPDATE';\\n  }\\n\\n  let body = {\\n    \\\"@type\\\": \\\"MessageCard\\\",\\n    \\\"@context\\\": \\\"http://schema.org/extensions\\\",\\n    \\\"themeColor\\\": \\\"0076D7\\\",\\n    \\\"summary\\\": \\\"Amplify Central Agent \\\"+suffix,\\n    \\\"sections\\\": [{\\n      \\\"activityTitle\\\": \\\"[**Amplify Central Agent**](https://docs.axway.com/bundle/amplify-central/page/docs/connect_manage_environ/index.html) \\\"+suffix,\\n      // \\\"activitySubtitle\\\": \\\"Agent Notification\\\",\\n      \\\"facts\\\": [{\\n        \\\"name\\\": \\\"Agent Name:\\\",\\n        \\\"value\\\": payload.name\\n      },\\n                {\\n                  \\\"name\\\": \\\"Agent Type:\\\",\\n                  \\\"value\\\": agentPrefix\\n                },\\n                {\\n                  \\\"name\\\": \\\"Environment:\\\",\\n                  \\\"value\\\": '[**'+payload.metadata.scope.name+'**]('+envURL+')'\\n                }],\\n      \\\"text\\\": message,\\n      \\\"markdown\\\": true\\n    }]\\n  };\\n\\n  return {body};\""
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.prepareTeamsMessageBody.result",
+					"routes": [
+						"rest.1"
+					],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.error",
+					"routes": [],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Execute"
+		},
+		"rest.1": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-restclient/rest",
+			"name": "sendToTeams",
+			"method": "post",
+			"parameters": [
+				{
+					"name": "body",
+					"type": "jsonpath",
+					"value": "$.prepareTeamsMessageBody.result.body",
+					"metaName": "Body",
+					"metaDescription": "The content to send."
+				},
+				{
+					"name": "url",
+					"type": "jsonpath",
+					"value": "$.env.MS_TEAMS_WEBHOOK_URL",
+					"metaName": "URL",
+					"metaDescription": "The target URL."
+				}
+			],
+			"outputs": {
+				"2xx": {
+					"routes": [
+						"http.2"
+					],
+					"context": "$.sendToTeams.response",
+					"metaName": "2XX"
+				},
+				"3xx": {
+					"routes": [
+						"http.3"
+					],
+					"context": "$.sendToTeams.response",
+					"metaName": "3XX"
+				},
+				"4xx": {
+					"routes": [
+						"http.3"
+					],
+					"context": "$.sendToTeams.response",
+					"metaName": "4XX"
+				},
+				"5xx": {
+					"routes": [
+						"http.3"
+					],
+					"context": "$.sendToTeams.response",
+					"metaName": "5XX"
+				},
+				"error": {
+					"routes": [
+						"http.3"
+					],
+					"context": "$.sendToTeams.response",
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "POST"
+		},
+		"http.3": {
+			"type": "nodehandler://axway-flow/http",
+			"name": "Set HTTP Response Teams Error",
+			"method": "setresponse",
+			"parameters": [
+				{
+					"name": "status",
+					"type": "number",
+					"value": "200",
+					"metaName": "Status",
+					"metaDescription": "The HTTP status code"
+				},
+				{
+					"name": "body",
+					"type": "jsonpath",
+					"value": "$.sendToTeams.response",
+					"metaName": "Body",
+					"metaDescription": "The response payload"
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				}
+			},
+			"metaMethod": "Set HTTP Response"
+		},
+		"condition.6": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "previousStateExists",
+			"method": "exists",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.request.body.payload.status.previousState",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"condition.5"
+					],
+					"context": "$.exists",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [],
+					"context": "$.exists",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Exists"
+		}
+	}
+}
