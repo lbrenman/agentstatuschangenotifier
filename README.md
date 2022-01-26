@@ -7,6 +7,7 @@ The project requires the following environment variables:
 
 This API Builder project exposes one API:
 * `/api/amplifycentralwebhookhandler` - triggered by Integration Resource Webhook for when an an Agent's status changes (i.e. stops running)
+* The API is a POST and requires a header called apikey with the value you set in the API_KEY env var
 
 Set your Integration Resource to point to the API Builder API as follows:
 
